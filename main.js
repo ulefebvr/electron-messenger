@@ -19,7 +19,7 @@ function applyNewCss() {
   console.log("Apply overide css")
   // console.log(fs.readFileSync(path.join(__dirname, 'browser.css'), 'utf8'))
   webContents.insertCSS(fs.readFileSync(path.join(__dirname, 'browser.css'), 'utf8'))
-  webContents.insertCSS(fs.readFileSync(path.join(__dirname, 'messenger-hover.css'), 'utf8'))
+//   webContents.insertCSS(fs.readFileSync(path.join(__dirname, 'messenger-hover.css'), 'utf8'))
   // webContents.insertCSS("._5742{ -webkit-app-region: drag !important;}")
 }
 
@@ -58,7 +58,7 @@ function createWindow () {
   // webContents.on('did-navigate-in-page', applyNewCss) // Necessary ?
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+//   mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
