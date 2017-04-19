@@ -6,24 +6,59 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
+const fs = require('fs')
+const config = require('./config')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
+function applyNewCss() {
+  let webContents = mainWindow.webContents
+
+  console.log("Apply overide css")
+  // console.log(fs.readFileSync(path.join(__dirname, 'browser.css'), 'utf8'))
+  webContents.insertCSS(fs.readFileSync(path.join(__dirname, 'browser.css'), 'utf8'))
+  webContents.insertCSS(fs.readFileSync(path.join(__dirname, 'messenger-hover.css'), 'utf8'))
+  // webContents.insertCSS("._5742{ -webkit-app-region: drag !important;}")
+}
+
 function createWindow () {
+  // Catch previous settings
+  let lastWindowState = config.get('lastWindowState');
+
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600})
+  mainWindow = new BrowserWindow({
+    x: lastWindowState.x,
+    y: lastWindowState.y,
+    width: lastWindowState.width,
+    height: lastWindowState.height,
+    titleBarStyle: 'hidden-inset', //Frameless but have to create a draggable zone
+    webPreferences: {
+        nodeIntegration: false,
+        // sandbox: true,
+        plugins: true
+    }
+  })
 
   // and load the index.html of the app.
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
+//   mainWindow.loadURL(url.format({
+//     pathname: path.join(__dirname, 'index.html'),
+//     protocol: 'file:',
+//     slashes: true
+//   }))
+
+  mainWindow.loadURL('https://messenger.com/login/')
+
+  let webContents = mainWindow.webContents
+
+  // Emitted when the document in the given frame is loaded.
+  webContents.on('dom-ready', applyNewCss)
+  // Emitted when an in-page navigation happened.
+  // webContents.on('did-navigate-in-page', applyNewCss) // Necessary ?
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -43,6 +78,9 @@ app.on('ready', createWindow)
 app.on('window-all-closed', function () {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
+  if (!mainWindow.isFullScreen()) {
+    config.set('lastWindowState', mainWindow.getBounds());
+  }
   if (process.platform !== 'darwin') {
     app.quit()
   }
